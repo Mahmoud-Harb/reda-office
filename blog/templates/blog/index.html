@@ -1,0 +1,70 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'blog/css/index-style.css' %}">
+    <title>Welocome</title>
+</head>
+<body>
+    <header id="showcase">
+        <h1 class="rtl">مكتب</h1>
+        <h1 class="h1-title rtl">د / رضا السيد عبد الحميد</h1>
+        <h2 class="rtl">اهلا وسلا بكم</h2>
+        <div class="adjacent-buttons">
+            {% if user.is_authenticated %}
+                <a class="button" href="{% url 'profile' %}">Mr. {{user}}</a>
+            {% else %}
+                <a href="#section-a" class="button rtl">ادخل المكتب</a>
+                <a href="{% url 'blog:blog-index' %}" class="rtl button">جولة</a>
+            {% endif %}
+        </div>
+        
+    </header>
+    <section id="section-a">
+        <p class="rtl">يقدم لكم المكتب خدمات عديدة لكلا من المحامين والعملاء
+        ,فهو عبارة عن منصة تواصل مشتركة تربط محامى مصر والعالم اجمع , كما تربط
+        العملاء فى كافة انحاء العالم </p>
+        <p class="rtl">سجل الان حتى تستفيد من خدمات الموقع العديدة.</p>
+        <p class="rtl">أو قم بالدخول اذا كان لديك حساب بالفعل.</p>
+    </section>
+    <section id="section-b">
+        {% if not user.is_authenticated %}
+        <div class="log-container">
+            <a class="btn" href="{% url 'login' %}">Login</a> 
+            <a class="btn" href="{% url 'register' %}">Sign Up</a>
+        </div>
+        {% endif %}
+    </section>
+    <!-- <section id="section-c">
+        <div class="box-1">
+            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ad
+            voluptatem rerum quod ullam ducimus nesciunt eligendi deleniti
+            doloribus distinctio blanditiis?
+        </div>
+        <div class="box-2">
+            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ad
+            voluptatem rerum quod ullam ducimus nesciunt eligendi deleniti
+            doloribus distinctio blanditiis?
+        </div>
+        <div class="box-3">
+            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ad
+            voluptatem rerum quod ullam ducimus nesciunt eligendi deleniti
+            doloribus distinctio blanditiis?
+        </div>
+    </section> -->
+    <footer class="footer">
+              <span class="text-muted">&copy; 2019 reda-office.com | All Rights
+              Reserved. 
+              <i class="block-level">Created by: <a href="mahmoudharb.ga">Mahmoud
+              Harb</a></i>
+            </span>
+              <span>جميع الحقوق محفوظة</span>
+              
+    </footer>
+</body>
+</html>

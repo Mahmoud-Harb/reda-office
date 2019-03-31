@@ -1,0 +1,183 @@
+{% extends 'blog/base.html' %}
+{% load my_filters %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Blog | Main Page
+{% endblock title %}
+
+{% block content %}
+    {% if posts %}
+        {% for post in posts %}
+        <article id="post-{{ post.id }}" class="media content-section
+        align-text-right rtl">
+            <img class="article-img rounded-circle ml-4" src="{{ post.author.profile.image.url }}"> 
+            <div class="media-body">
+                <div class="article-metadata">
+                    <small class="text-muted">{{ post.date_posted }}</small>
+                    <a class="ml-2 " href="{% url 'blog:user-posts' post.author.username %}"> {{ post.author }}</a>
+                    
+                    <h2 class="article-title"><a href="{% url 'blog:post-detail' post.id %}">{{ post.title }}</a></h2>    
+                    {% if post.image_upload %}
+                    <div class="image-container">
+                        <a href="{{ post.image_upload.url }}"><img src="{{ post.image_upload.url }}" alt=""></a> 
+                    </div>
+                    {% endif %} 
+                    {% if post.file_upload and user.profile.trusted %}
+                    <div class="article-content file-container">
+                        <h6 class="file-link">{{ post.file_upload.name }}</h6>
+                        <a class="btn btn-info" href="{{ post.file_upload.url }}">حمل</a> 
+                    </div>
+                {% endif %} 
+                    <p class="article-content post-content"> {{ post.content }} </p>
+                </div>
+                {% if user.profile.trusted %}
+                    {% if post.reply_set.all %}
+                        {% if post.reply_set.all.count == 1 %}
+                        <!-- post one reply only -->
+                            <div class="reply-container" id="replies-{{ post.id }}">
+                                <div class="one-reply">
+                                    <br>    
+                                <p class="article-content">{{ post.reply_set.all.0.reply }}</p>
+                                <small>
+                                        <img class="article-reply-img
+                                        rounded-circle ml-2"
+                                        src="{{ post.reply_set.all.0.author.profile.image.url }}">
+                                         
+                                </small> 
+                                <small class="text-muted">{{ post.reply_set.all.0.date_posted }}</small>
+                                <a class="mr-2 ml-2" href="{% url 'blog:user-posts' post.reply_set.all.0.author.username %}">{{ post.reply_set.all.0.author }}</a>
+                               
+                                <hr>
+                                <br>
+                                </div>
+                            </div>
+                        {% elif post.reply_set.all.count >= 2 %}
+                        <!-- post two replies only -->
+                        <div class="" id="replies-{{ post.id }}">
+                            <div class="reply-container">
+                            <div class="one-reply">
+                                <br>
+                            <p class="article-content">{{ post.reply_set.all.0.reply }}</p>
+                            <small>
+                                    <img class="article-reply-img rounded-circle
+                                    ml-2"
+                                    src="{{ post.reply_set.all.0.author.profile.image.url }}">
+                                   </small>
+                                    <small class="text-muted">{{ post.reply_set.all.0.date_posted }}</small>
+                                     <a class="mr-2 ml-2" href="{% url 'blog:user-posts' post.reply_set.all.0.author.username %}">{{ post.reply_set.all.0.author }}</a>
+                            
+                            <hr>
+                            <br>
+                            </div>
+                            <div class="one-reply">
+                                <br>
+                            <p class="article-content">{{ post.reply_set.all.1.reply }}</p>
+                            <small>
+                                    <img class="article-reply-img rounded-circle
+                                    ml-2"
+                                    src="{{ post.reply_set.all.1.author.profile.image.url }}">
+                                    </small>
+                                <small class="text-muted">{{ post.reply_set.all.1.date_posted }}</small>
+                                 <a class="mr-2 ml-2" href="{% url 'blog:user-posts' post.reply_set.all.1.author.username %}">{{ post.reply_set.all.1.author }}</a>
+                            
+                            <hr>
+                            <br>
+                            </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <!-- ---------- -->
+                        {% if post.reply_set.all.count > 2 %}
+                        <!-- post all replies in case of "show more" -->
+                            <div id="all-hidden-replies-{{ post.id }}" class="hidden">
+                                <div class="reply-container">
+                                {% for reply in post.reply_set.all %}
+                                <div class="one-reply">
+                                <br>
+                                <p class="article-content">{{ reply }}</p>
+                                <small>
+                                    <img class="article-reply-img rounded-circle
+                                    ml-2"
+                                        src="{{ reply.author.profile.image.url }}">
+                                        </small> 
+                                <small class="text-muted">{{ reply.date_posted }}</small>
+                                <a class="mr-2 ml-2" href="{% url 'blog:user-posts' reply.author.username %}">{{ reply.author }}</a>
+                                
+                                <hr>
+                                <br>
+                                </div>
+                                {% endfor %}
+                                </div>
+                            </div>
+                            <div class="more-link">
+                                <small ><a href='' id='more-{{ post.id }}' 
+                                    onclick='moreReplies("{{ post.id }}".replace(/&quot;/g,"\"")); return false;'>
+                                                مزيد من الردود</a></small> 
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    <br>
+                    <form method="POST"
+                     action="{% url 'blog:reply-create' post.id %}">
+                            {% csrf_token %}
+                            <fieldset class="form-group">
+                                {{ reply_form|crispy }}
+                            </fieldset>
+                            <div class="form-group">
+                                <button class="btn btn-outline-info"
+                                 type="submit">انشر ردك</button>
+                            </div>
+                    </form>
+                    <!-- <small><a href="{% url 'blog:reply-create' post.id %}?next{{ request.path}}">reply</a></small> -->
+                {% else %}
+                <small>Upload a piture for your ID at your profile page to add
+                        posts and reply.</small>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    {% endif %}
+    <div class="long-margin-bottom"></div>
+    <!-- ------------------------------------------------------------------- -->
+    {% if is_paginated %}
+        {% if page_obj.has_previous %}
+            <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+            <a class="btn btn-outline-info mb-4"
+            href="?page={{ page_obj.previous_page_number }}">previous</input>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-info mb-4"
+                href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+    {% endif %}
+
+    <script type="text/javascript">
+        // moreReplies(Post.id) fun responsible for the "more replies" link
+        // by showing and hiding replies more than 2. 
+        var i = 0;
+        function moreReplies(num){
+            if(i === 0){
+                document.getElementById("replies-"+num).className = 'hidden';
+                document.getElementById("all-hidden-replies-"+num).className = 'displayed';
+                document.getElementById("more-"+num).innerHTML = 'ردود اقل';
+                i = 1;                
+            } 
+            else if(i === 1) {
+                    document.getElementById("all-hidden-replies-"+num).className = 'hidden';
+                    document.getElementById("replies-"+num).className = 'displayed';
+                    document.getElementById("more-"+num).innerHTML = 'مزيد من الردود';
+                    i = 0;
+            }
+        }
+    </script>
+{% endblock %}
+<!-- <input type="hidden" id="myVar" name="variable" value="{{ post }}"> -->

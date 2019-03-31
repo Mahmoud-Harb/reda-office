@@ -1,0 +1,62 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+    Blog | Main Page
+{% endblock %}
+
+{% block content %}
+<div class="profile-info-cont rtl align-text-right">
+    
+        <h2 class="mb-3">قام {{ view.kwargs.username }} بنشر ({{ page_obj.paginator.count }}) منشور</h2>
+    <!-- <h2 class="mb-3">Posted by {{ view.kwargs.username }} - ({{ page_obj.paginator.count }}) posts</h2> -->
+    {% if posts %}   
+    {% if user.profile.trusted %}
+        <i class="fas fa-envelope"></i><small class="text-secondary">{{ posts.0.author.email }}</small>
+        <br>
+        <i class="fas fa-phone"></i><small class="text-secondary">{{ posts.0.author.profile.phone_number }}</small>
+        <br>
+                {% if posts.0.author.profile.trusted %}
+                <i class="fas fa-check-circle"></i><small class="trusted">Trusted</small>
+                {% else %}
+                <i class="fas fa-times-circle"></i><small class="not-trusted">Not Trusted</small>
+                {% endif %}
+    {% endif %}
+    {% endif %}
+</div>
+    {% if posts %}
+        {% for post in posts %}
+        <article class="media content-section align-text-right rtl">
+            <img class="article-img rounded-circle ml-4" src="{{ post.author.profile.image.url }}"> 
+            <div class="media-body">
+                <div class="article-metadata">
+            <small class="text-muted">{{ post.date_posted }}</small>
+            <a class="ml-2" href="{% url 'blog:user-posts' post.author.username %}"> {{ post.author }}</a>
+            
+            <h2><a class="article-title" href="{% url 'blog:post-detail' post.id %}">{{ post.title }}</a></h2>    
+            <p class="article-content"> {{ post.content }} </p>
+                
+        </article>
+        {% endfor %}
+    {% endif %}
+    {% if is_paginated %}
+    {% if page_obj.has_previous %}
+        <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+        <a class="btn btn-outline-info mb-4"
+         href="?page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+       {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+       {% endfor %}
+    {% if page_obj.has_next %}
+       <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+       <a class="btn btn-outline-info mb-4"
+        href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+   {% endif %}
+    {% endif %}
+
+{% endblock %}
+
