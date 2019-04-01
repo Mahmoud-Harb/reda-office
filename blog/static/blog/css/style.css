@@ -203,7 +203,7 @@ input {
 }
 .clearablefileinput  {
   width: 220px;
-  font-size: 10px;
+  /* font-size: 10px; */
   display: block;
 }
 #id_image-clear_id {
